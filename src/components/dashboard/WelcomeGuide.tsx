@@ -1,8 +1,11 @@
-import React from 'react';
-import { Package, Hammer, Users, Bike, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Package, Hammer, Users, Bike, ArrowRight, CheckCircle2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export const WelcomeGuide: React.FC = () => {
+interface WelcomeGuideProps {
+    onClose?: () => void;
+}
+
+export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose }) => {
     const steps = [
         {
             title: 'Configura tu Inventario',
@@ -40,6 +43,15 @@ export const WelcomeGuide: React.FC = () => {
 
     return (
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden mb-12 border border-slate-700/50">
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all z-20"
+                    title="Cerrar guía"
+                >
+                    <X size={24} />
+                </button>
+            )}
             {/* Decorative circles */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>

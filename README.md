@@ -59,10 +59,13 @@ La plataforma fue refactorizada para operar bajo un modelo SaaS multi-inquilino 
    ```
 
 4. **Configuración de Base de Datos:**
-   Ejecute los scripts de migración ubicados en `brain/` dentro del SQL Editor de Supabase en este orden:
-   1. `migration_v2.sql` (Esquema central)
-   2. `migration_security.sql` (Seguridad y Perfiles)
-   3. `create_apu_templates.sql` (Datos semilla)
+   Ejecute los scripts de migración ubicados en `supabase/migrations/` dentro del SQL Editor de Supabase en este orden:
+   1. `00_migration_v2.sql` (Esquema central)
+   2. `01_migration_security.sql` (Seguridad y Perfiles)
+   3. `02_create_apu_templates.sql` (Datos semilla/APU)
+   4. `03_fix_orders_rls.sql` (Parche de seguridad)
+   5. `04_add_bike_type.sql` (Actualización de tipos de bicit)
+   6. `05_add_mechanic_to_order.sql` (Asignación de mecánicos)
 
 5. **Correr en desarrollo:**
    ```bash

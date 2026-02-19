@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Timeline } from '../components/ui/Timeline';
-import { Wrench, DollarSign, Bike, AlertTriangle, Filter, Plus, ChevronRight, TrendingUp } from 'lucide-react';
+import { Wrench, DollarSign, Bike, AlertTriangle, Filter, Plus, ChevronRight, TrendingUp, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWorkOrders } from '../hooks/useWorkOrders';
 import { WelcomeGuide } from '../components/dashboard/WelcomeGuide';
@@ -12,9 +12,10 @@ import { CreateOrderModal } from '../components/work-orders/CreateOrderModal';
 
 export const Dashboard: React.FC = () => {
     // const { perfil } = useAuth(); // Unused for now
-    const { orders, error } = useWorkOrders();
+    const { orders, error, loading } = useWorkOrders();
     // const [filterPeriod, setFilterPeriod] = useState<'today' | 'week' | 'month'>('today'); // Unused for now
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+    const [showGuide, setShowGuide] = useState(false);
 
     const stats = [
         {
@@ -87,13 +88,22 @@ export const Dashboard: React.FC = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
-            {orders.length === 0 && <WelcomeGuide />}
+            {showGuide && <WelcomeGuide onClose={() => setShowGuide(false)} />}
 
             {/* Page Heading */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Panel de Control</h1>
-                    <p className="text-slate-500 font-medium">Resumen general del taller para hoy</p>
+                <div className="flex items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Panel de Control</h1>
+                        <p className="text-slate-500 font-medium">Resumen general del taller para hoy</p>
+                    </div>
+                    <button
+                        onClick={() => setShowGuide(true)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                        title="Ver guía de configuración"
+                    >
+                        <HelpCircle size={24} />
+                    </button>
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto">
                     <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
