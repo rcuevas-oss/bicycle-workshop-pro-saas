@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Timeline } from '../components/ui/Timeline';
-import { Wrench, DollarSign, Bike, AlertTriangle, Filter, Plus, ChevronRight, TrendingUp, Loader2 } from 'lucide-react';
+import { Wrench, DollarSign, Bike, AlertTriangle, Filter, Plus, ChevronRight, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWorkOrders } from '../hooks/useWorkOrders';
 import { WelcomeGuide } from '../components/dashboard/WelcomeGuide';
@@ -12,7 +12,7 @@ import { CreateOrderModal } from '../components/work-orders/CreateOrderModal';
 
 export const Dashboard: React.FC = () => {
     // const { perfil } = useAuth(); // Unused for now
-    const { orders, loading, error } = useWorkOrders();
+    const { orders, error } = useWorkOrders();
     // const [filterPeriod, setFilterPeriod] = useState<'today' | 'week' | 'month'>('today'); // Unused for now
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
@@ -66,14 +66,8 @@ export const Dashboard: React.FC = () => {
         { id: '4', title: 'Comentario Agregado', description: 'Cliente aprobó cambio de cadena', time: 'Hace 2h', type: 'info' },
     ];
 
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-                <Loader2 className="animate-spin text-blue-600" size={48} />
-                <p className="text-slate-500 font-bold animate-pulse">Cargando datos del taller...</p>
-            </div>
-        );
-    }
+    // We no longer block the entire dashboard with a full-screen loader.
+    // Instead, stats and tables will show empty or simplified states while fetching.
 
     if (error) {
         return (

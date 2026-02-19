@@ -41,27 +41,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log('Auth Event:', event, session?.user?.id);
 
             if (!mounted) return;
-
             setUser(session?.user ?? null);
+            setLoading(false); // Stop blocking as soon as we know IF there is a user
 
             if (session?.user) {
-                // Fetch profile whenever session exists OR changes
-                await fetchPerfil(session.user.id);
+                fetchPerfil(session.user.id);
             } else {
                 setPerfil(null);
-                setLoading(false);
             }
         });
 
-        // 2. Initial manual check (to speed up first paint if session is already there)
         const checkInitialSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (mounted) {
+                setUser(session?.user ?? null);
+                setLoading(false); // Stop blocking
                 if (session?.user) {
-                    setUser(session.user);
-                    await fetchPerfil(session.user.id);
-                } else {
-                    setLoading(false);
+                    fetchPerfil(session.user.id);
                 }
             }
         };

@@ -9,6 +9,7 @@ export const useWorkOrders = () => {
 
     const fetchOrders = async () => {
         try {
+            console.log('useWorkOrders: Starting fetch...');
             setLoading(true);
             const { data, error } = await supabase
                 .from('ordenes_trabajo')
@@ -20,11 +21,17 @@ export const useWorkOrders = () => {
         `)
                 .order('creado_en', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error('useWorkOrders: Filter error:', error);
+                throw error;
+            }
+            console.log('useWorkOrders: Data received:', data?.length || 0, 'rows');
             setOrders((data as any) || []);
         } catch (err: any) {
+            console.error('useWorkOrders: Catch error:', err);
             setError(err.message);
         } finally {
+            console.log('useWorkOrders: Fetch finished.');
             setLoading(false);
         }
     };
