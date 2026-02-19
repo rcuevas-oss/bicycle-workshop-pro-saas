@@ -1,0 +1,1 @@
+ALTER TABLE ordenes_trabajo DROP CONSTRAINT IF EXISTS ordenes_trabajo_mecanico_id_fkey; ALTER TABLE ordenes_trabajo ADD CONSTRAINT ordenes_trabajo_mecanico_id_fkey FOREIGN KEY (mecanico_id) REFERENCES mecanicos(id);

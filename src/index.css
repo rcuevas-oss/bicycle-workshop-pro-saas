@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #00607a;
+  --color-primary-dark: #004d61;
+  --color-accent: #a3e635;
+  --color-accent-dark: #84cc16;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+
+  --color-bg-base: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-bg-sidebar: #0f172a;
+
+  --color-text-main: #1e293b;
+  --color-text-muted: #64748b;
+
+  --color-border: #e2e8f0;
+
+  --radius-md: 16px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-bg-base text-text-main antialiased;
+}
+
+/* Custom UI Components styles (global fallback) */
+.card {
+  @apply bg-white rounded-md p-4 shadow-sm border border-gray-200;
+}
+
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-all duration-200;
+}

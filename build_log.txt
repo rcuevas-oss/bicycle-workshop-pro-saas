@@ -1,0 +1,7 @@
+
+> bicycle-workshop-pro@0.0.0 build
+> tsc -b && vite build
+
+src/components/layout/Header.tsx(3,1): error TS6133: 'Button' is declared but its value is never read.
+src/components/layout/Sidebar.tsx(4,1): error TS6133: 'Button' is declared but its value is never read.
+src/pages/Dashboard.tsx(5,51): error TS6133: 'Search' is declared but its value is never read.

@@ -1,0 +1,12 @@
+
+> bicycle-workshop-pro@0.0.0 build
+> tsc -b && vite build
+
+src/components/ui/Timeline.tsx(2,10): error TS6133: 'Clock' is declared but its value is never read.
+src/components/ui/Timeline.tsx(28,31): error TS6133: 'index' is declared but its value is never read.
+src/hooks/useWorkOrderDetail.ts(3,10): error TS1484: 'OrdenTrabajo' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/hooks/useWorkOrderDetail.ts(3,24): error TS1484: 'ServicioManoObra' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/hooks/useWorkOrders.ts(3,10): error TS1484: 'OrdenTrabajo' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/hooks/useWorkOrders.ts(36,17): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '"postgres_changes"' is not assignable to parameter of type '"system"'.
