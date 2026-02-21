@@ -9,10 +9,11 @@ Workshop Pro es una plataforma SaaS (Software as a Service) moderna, diseñada e
 *   **Alertas de Stock**: Indicadores visuales para niveles críticos bajo el mínimo.
 *   **Valorización de Inventario**: Cálculo en tiempo real del capital inmovilizado en insumos.
 
-### 2. Catálogo de Servicios y Recetas APU (Análisis de Precios Unitarios)
-*   **Recetas Inteligentes**: Automatice la orden de trabajo vinculando materiales específicos a cada servicio.
-*   **Mago de Plantillas**: Cargue configuraciones estándar (ej. "Mantenimiento Preventivo") con un solo clic.
-*   **Mano de Obra y Comisiones**: Gestión transparente de porcentajes y pagos para el equipo técnico.
+### 2. Flujo de Recepción y Checklist Digital
+*   **Inspección Rápida y Profesional**: Evalúe hasta 7 componentes críticos de la bicicleta (Desde Transmisión hasta Electrónica) con estados visuales semaforizados (OK, Regular, Malo, N/A).
+*   **Testigo Documental de Accesorios**: Deje un registro en un solo clic si el cliente dejó Luces, Bolso, Candado o Casco, evitando extravíos.
+*   **Notas de Taller al Instante**: Capture observaciones puntuales directas en la comanda.
+*   **Mano de Obra y Comisiones**: Gestión transparente de porcentajes de mecánica y egresos diarios para el equipo técnico.
 
 ### 3. Administración Contable y Arqueo de Caja
 *   **Estado de Resultados (P&L)**: Resumen dinámico de Ingresos vs. Egresos (incluyendo comisiones de mecánicos).
@@ -27,7 +28,7 @@ Workshop Pro es una plataforma SaaS (Software as a Service) moderna, diseñada e
 
 La plataforma fue refactorizada para operar bajo un modelo SaaS multi-inquilino (Multi-tenant) robusto:
 
-*   **Frontend**: React 19 + TypeScript + Vite.
+*   **Frontend**: React 19 + TypeScript (100% tipado estricto, 0 `any` implícitos) + Vite.
 *   **Estilos**: Vanilla CSS con enfoque "Workshop Pro Theme" (Azul petróleo y verde lima).
 *   **Backend & DB**: Supabase (PostgreSQL).
 *   **Seguridad (RLS)**: Aislamiento total de datos a nivel de fila (*Row Level Security*) mediante `business_id` para garantizar que cada taller vea únicamente su información.
@@ -62,10 +63,11 @@ La plataforma fue refactorizada para operar bajo un modelo SaaS multi-inquilino 
    Ejecute los scripts de migración ubicados en `supabase/migrations/` dentro del SQL Editor de Supabase en este orden:
    1. `00_migration_v2.sql` (Esquema central)
    2. `01_migration_security.sql` (Seguridad y Perfiles)
-   3. `02_create_apu_templates.sql` (Datos semilla/APU)
+   3. `02_create_apu_templates.sql` (Datos Semilla - *Deprecado*)
    4. `03_fix_orders_rls.sql` (Parche de seguridad)
    5. `04_add_bike_type.sql` (Actualización de tipos de bicit)
    6. `05_add_mechanic_to_order.sql` (Asignación de mecánicos)
+   7. `260221164904_drop_apu_and_add_checklist.sql` (Migración V3: Eliminación industrial APU y adición del Checklist Digital JSONB)
 
 5. **Correr en desarrollo:**
    ```bash
