@@ -16,7 +16,7 @@ export const useWorkOrders = () => {
                 .select(`
           *,
           cliente:clientes(*),
-          bicicleta:bicicletas(*),
+          bicicleta:bicicletas(*, cliente:clientes(*)),
           mecanico:mecanicos(*)
         `)
                 .order('creado_en', { ascending: false });
@@ -26,10 +26,10 @@ export const useWorkOrders = () => {
                 throw error;
             }
             console.log('useWorkOrders: Data received:', data?.length || 0, 'rows');
-            setOrders((data as any) || []);
-        } catch (err: any) {
+            setOrders((data as unknown as OrdenTrabajo[]) || []);
+        } catch (err) {
             console.error('useWorkOrders: Catch error:', err);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             console.log('useWorkOrders: Fetch finished.');
             setLoading(false);

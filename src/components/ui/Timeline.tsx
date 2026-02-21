@@ -24,17 +24,17 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
     };
 
     return (
-        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+        <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-slate-100">
             {items.map((item) => {
                 const config = getConfig(item.type);
                 return (
-                    <div key={item.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div key={item.id} className="relative flex items-start gap-6 group">
                         {/* Dot */}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full border bg-white shadow-sm z-10 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${config.border} ${config.color}`}>
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full border bg-white shadow-sm z-10 shrink-0 ${config.border} ${config.color}`}>
                             {config.icon}
                         </div>
                         {/* Content */}
-                        <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl bg-slate-50/50 border border-slate-100 group-hover:bg-white group-hover:shadow-lg transition-all">
+                        <div className="flex-1">
                             <div className="flex items-center justify-between space-x-2 mb-1">
                                 <div className="font-bold text-slate-900 text-sm leading-tight">{item.title}</div>
                                 <time className="font-medium text-[10px] text-slate-400 uppercase tracking-tighter whitespace-nowrap">{item.time}</time>

@@ -18,8 +18,8 @@ export const useMechanics = () => {
 
             if (error) throw error;
             setMechanics(data || []);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -34,9 +34,9 @@ export const useMechanics = () => {
             if (error) throw error;
             await fetchMechanics();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error creating mechanic:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -50,9 +50,9 @@ export const useMechanics = () => {
             if (error) throw error;
             await fetchMechanics();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error updating mechanic:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -67,9 +67,9 @@ export const useMechanics = () => {
             if (error) throw error;
             await fetchMechanics();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error deleting mechanic:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 

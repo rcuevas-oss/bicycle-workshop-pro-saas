@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
@@ -18,7 +18,8 @@ type AuthContextType = {
     authError: string | null;
 };
 
-const AuthContext = createContext<AuthContextType>({
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext<AuthContextType>({
     user: null,
     perfil: null,
     loading: true,
@@ -32,6 +33,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
     const [authError, setAuthError] = useState<string | null>(null);
 
+    const fetchPerfil = async (userId: string, userEmail?: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('perfiles')
+                .select('*')
+                .eq('id', userId)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Error fetching profile:', error);
+                setAuthError(error.message);
+                // Fallback: Create temporary profile even on error to allow login
+                setPerfil({
+                    id: userId,
+                    nombre: userEmail?.split('@')[0] || 'Usuario',
+                    rol: 'mecanico',
+                    email: userEmail || '',
+                    negocio_id: ''
+                });
+            } else if (data) {
+                setPerfil(data);
+                setAuthError(null);
+            } else {
+                // No profile found - user exists in Auth but not in our 'perfiles' table
+                console.warn('No profile found for user:', userId);
+                setPerfil(null);
+            }
+        } catch (err) {
+            console.error('Unexpected auth error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         let mounted = true;
@@ -45,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setLoading(false); // Stop blocking as soon as we know IF there is a user
 
             if (session?.user) {
-                fetchPerfil(session.user.id);
+                fetchPerfil(session.user.id, session.user.email);
             } else {
                 setPerfil(null);
             }
@@ -57,7 +91,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUser(session?.user ?? null);
                 setLoading(false); // Stop blocking
                 if (session?.user) {
-                    fetchPerfil(session.user.id);
+                    fetchPerfil(session.user.id, session.user.email);
+                } else {
+                    setPerfil(null); // Set perfil to null if no session user
                 }
             }
         };
@@ -77,48 +113,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subscription.unsubscribe();
             clearTimeout(timer);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    const fetchPerfil = async (userId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('perfiles')
-                .select('*')
-                .eq('id', userId)
-                .maybeSingle();
-
-            if (error) {
-                console.error('Error fetching profile:', error);
-                setAuthError(error.message);
-                // Fallback: Create temporary profile even on error to allow login
-                setPerfil({
-                    id: userId,
-                    nombre: user?.email?.split('@')[0] || 'Usuario',
-                    rol: 'mecanico',
-                    email: user?.email || '',
-                    negocio_id: ''
-                });
-            } else if (data) {
-                setPerfil(data);
-                setAuthError(null);
-            } else {
-                // No profile found - maybe a new user without a profile row yet
-                console.warn('No profile found for user:', userId);
-                // We create a minimal volatile profile so the app doesn't crash
-                setPerfil({
-                    id: userId,
-                    nombre: user?.email?.split('@')[0] || 'Usuario',
-                    rol: 'mecanico',
-                    email: user?.email || '',
-                    negocio_id: '' // This will cause issues but allows UI to load
-                });
-            }
-        } catch (err: any) {
-            console.error('Unexpected auth error:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const signOut = async () => {
         setLoading(true);
@@ -145,4 +141,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 
-export const useAuth = () => useContext(AuthContext);

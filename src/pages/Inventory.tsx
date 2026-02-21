@@ -72,8 +72,8 @@ export const Inventory: React.FC = () => {
             {/* Header & Stats */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Pañol de Insumos</h1>
-                    <p className="text-slate-500 font-medium">Gestión de costos internos y stock de taller</p>
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Inventario de Bodega</h1>
+                    <p className="text-slate-500 font-medium">Gestión de repuestos y accesorios</p>
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto">
                     <button
@@ -165,8 +165,9 @@ export const Inventory: React.FC = () => {
                                 <tr>
                                     <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-20">SKU</th>
                                     <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Producto</th>
-                                    <th className="px-4 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-32">Stock</th>
-                                    <th className="px-4 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-32">Valor Ref. (APU)</th>
+                                    <th className="px-4 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-40">Disponibilidad</th>
+                                    <th className="px-4 py-4 text-right text-xs font-black text-slate-400 uppercase tracking-widest w-32">Precio Público</th>
+                                    <th className="px-4 py-4 text-right text-xs font-black text-slate-400 uppercase tracking-widest w-32">Costo Interno</th>
                                     <th className="px-4 py-4 text-right w-24">Acciones</th>
                                 </tr>
                             </thead>
@@ -196,17 +197,23 @@ export const Inventory: React.FC = () => {
                                                     <span className={`font-black ${product.stock_actual <= product.stock_minimo ? 'text-red-600' : 'text-slate-700'}`}>
                                                         {product.stock_actual}
                                                     </span>
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase">{product.unidad_medida === 'gramos' ? 'G' : product.unidad_medida === 'mililitros' ? 'ML' : product.unidad_medida === 'metros' ? 'M' : 'UN'}</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase">
+                                                        uni
+                                                    </span>
                                                     {product.stock_actual <= product.stock_minimo && (
                                                         <AlertTriangle size={14} className="text-red-500 animate-pulse" />
                                                     )}
                                                 </div>
-                                                <div className="text-[10px] text-slate-400 font-medium">Min: {product.stock_minimo}</div>
+                                                <div className="text-[10px] text-slate-400 font-medium">Bajo: {product.stock_minimo}</div>
                                             </div>
                                         </td>
                                         <td className="px-4 py-4 text-right">
                                             <div className="font-bold text-slate-900">${product.precio_venta.toLocaleString('es-CL')}</div>
-                                            <div className="text-[10px] text-slate-400 font-bold uppercase">/{product.unidad_medida === 'unidades' ? 'UN' : product.unidad_medida === 'gramos' ? 'G' : product.unidad_medida === 'mililitros' ? 'ML' : 'M'}</div>
+                                            <div className="text-[10px] text-slate-400 font-bold uppercase">per uni</div>
+                                        </td>
+                                        <td className="px-4 py-4 text-right">
+                                            <div className="font-bold text-emerald-600">${product.costo.toLocaleString('es-CL')}</div>
+                                            <div className="text-[10px] text-slate-400 font-bold uppercase">Costo Interno</div>
                                         </td>
                                         <td className="px-4 py-4 text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -4,9 +4,11 @@ import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import {
     Search, Plus, AlertOctagon,
-    Layers, Hammer, Pencil, Trash2
+    Hammer, Pencil, Trash2
 } from 'lucide-react';
-import { useServices, type ServiceWithRecipe } from '../hooks/useServices';
+import { useServices } from '../hooks/useServices';
+import type { ServicioCatalogo } from '../types/database';
+
 import { ServiceModal } from '../components/services/ServiceModal';
 import { ConfirmationModal } from '../components/ui/ConfirmationModal';
 
@@ -15,8 +17,8 @@ export const Services: React.FC = () => {
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
     // CRUD State
-    const [editingService, setEditingService] = useState<ServiceWithRecipe | null>(null);
-    const [deletingService, setDeletingService] = useState<ServiceWithRecipe | null>(null);
+    const [editingService, setEditingService] = useState<ServicioCatalogo | null>(null);
+    const [deletingService, setDeletingService] = useState<ServicioCatalogo | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleCreate = () => {
@@ -24,12 +26,12 @@ export const Services: React.FC = () => {
         setIsServiceModalOpen(true);
     };
 
-    const handleEdit = (service: ServiceWithRecipe) => {
+    const handleEdit = (service: ServicioCatalogo) => {
         setEditingService(service);
         setIsServiceModalOpen(true);
     };
 
-    const handleDelete = (service: ServiceWithRecipe) => {
+    const handleDelete = (service: ServicioCatalogo) => {
         setDeletingService(service);
     };
 
@@ -66,7 +68,7 @@ export const Services: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Catálogo de Servicios</h1>
-                    <p className="text-slate-500 font-medium">Mano de obra y recetas APU</p>
+                    <p className="text-slate-500 font-medium">Gestión de mano de obra</p>
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto">
                     <button
@@ -114,22 +116,6 @@ export const Services: React.FC = () => {
                     ) : (
                         filteredServices.map(service => (
                             <div key={service.id} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group relative">
-                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                    <button
-                                        onClick={() => handleEdit(service)}
-                                        className="p-2 bg-white text-blue-600 rounded-full shadow-md hover:bg-blue-50 transition-colors border border-blue-100"
-                                        title="Editar Servicio"
-                                    >
-                                        <Pencil size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(service)}
-                                        className="p-2 bg-white text-red-600 rounded-full shadow-md hover:bg-red-50 transition-colors border border-red-100"
-                                        title="Eliminar Servicio"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
 
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex gap-4">
@@ -137,7 +123,25 @@ export const Services: React.FC = () => {
                                             <Hammer size={24} />
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-black text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{service.nombre}</h3>
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors">{service.nombre}</h3>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => handleEdit(service)}
+                                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        title="Editar"
+                                                    >
+                                                        <Pencil size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(service)}
+                                                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                             <p className="text-sm text-slate-500 mb-3">{service.descripcion || 'Sin descripción'}</p>
                                             <div className="flex items-center gap-3">
                                                 <Badge variant="info">
@@ -147,27 +151,11 @@ export const Services: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-2xl font-black text-slate-900">${service.precio_base.toLocaleString('es-CL')}</p>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Precio Base</p>
+                                        <p className="text-2xl font-black text-slate-900">
+                                            ${service.precio_base.toLocaleString('es-CL')}
+                                        </p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Precio Total</p>
                                     </div>
-                                </div>
-
-                                {/* Receta APU */}
-                                <div className="mt-6 pt-4 border-t border-slate-50">
-                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                                        <Layers size={14} /> Insumos Incluidos (APU)
-                                    </h4>
-                                    {service.receta && service.receta.length > 0 ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {service.receta.map((receta, idx) => (
-                                                <span key={idx} className="bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-100">
-                                                    Item ID: {receta.producto_id.slice(0, 6)}... × {receta.cantidad_sugerida}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-xs text-slate-400 italic">Sin insumos configurados.</p>
-                                    )}
                                 </div>
                             </div>
                         ))

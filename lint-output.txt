@@ -1,0 +1,13 @@
+
+> bicycle-workshop-pro@0.0.0 lint
+> eslint .
+
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\context\AuthContext.tsx
+  21:14  error  Fast refresh only works when a file only exports components. Move your React context(s) to a separate file  react-refresh/only-export-components
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\tmp_original.tsx
+  174:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 2 problems (2 errors, 0 warnings)
+

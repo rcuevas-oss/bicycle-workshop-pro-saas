@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Search, DollarSign, Calendar, FileText, CheckCircle2, Clock } from 'lucide-react';
-import { useCommissions } from '../../hooks/useCommissions';
+import { useCommissions, type CommissionData } from '../../hooks/useCommissions';
 import { Badge } from '../ui/Badge';
 import { Loader2 } from 'lucide-react';
 
@@ -17,12 +17,12 @@ export const CommissionHistoryModal: React.FC<CommissionHistoryModalProps> = ({ 
     if (!isOpen) return null;
 
     const totalPendiente = commissions
-        .filter((c: any) => c.estado === 'pendiente')
-        .reduce((acc: number, c: any) => acc + c.monto, 0);
+        .filter((c: CommissionData) => c.estado === 'pendiente')
+        .reduce((acc: number, c: CommissionData) => acc + c.monto, 0);
 
     const totalPagado = commissions
-        .filter((c: any) => c.estado === 'pagada')
-        .reduce((acc: number, c: any) => acc + c.monto, 0);
+        .filter((c: CommissionData) => c.estado === 'pagada')
+        .reduce((acc: number, c: CommissionData) => acc + c.monto, 0);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -75,7 +75,7 @@ export const CommissionHistoryModal: React.FC<CommissionHistoryModalProps> = ({ 
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {commissions.map((commission: any) => (
+                            {commissions.map((commission: CommissionData) => (
                                 <div key={commission.id} className="group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                     <div className="flex items-start gap-4">
                                         <div className={`p-4 rounded-2xl ${commission.estado === 'pagada' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>

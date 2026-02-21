@@ -11,18 +11,28 @@ import { Inventory } from './pages/Inventory';
 import { Services } from './pages/Services';
 import { Commissions } from './pages/Commissions';
 import { Finances } from './pages/Finances';
+import { Profile } from './pages/Profile';
+import { Settings } from './pages/Settings';
+
+import { LandingPage } from './pages/LandingPage';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Rutas Públicas */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        <Route path="/" element={
-          <PrivateRoute>
-            <DashboardLayout />
-          </PrivateRoute>
+        {/* Rutas Privadas del SaaS */}
+        <Route path="/app" element={
+          <ErrorBoundary>
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          </ErrorBoundary>
         }>
           <Route index element={<Dashboard />} />
           <Route path="work-orders" element={<WorkOrders />} />
@@ -32,6 +42,8 @@ function App() {
           <Route path="services" element={<Services />} />
           <Route path="commissions" element={<Commissions />} />
           <Route path="finances" element={<Finances />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>

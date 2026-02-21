@@ -17,8 +17,8 @@ export const useInventory = () => {
 
             if (error) throw error;
             setProducts(data as InventarioItem[] || []);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -56,9 +56,9 @@ export const useInventory = () => {
             if (error) throw error;
             await fetchInventory();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error creating product:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -72,9 +72,9 @@ export const useInventory = () => {
             if (error) throw error;
             await fetchInventory();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error updating product:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -91,16 +91,7 @@ export const useInventory = () => {
                 return { success: false, error: 'No se puede eliminar el producto porque ha sido utilizado en órdenes de trabajo.' };
             }
 
-            // Check for dependencies (Recipes)
-            const { count: recipesCount, error: recipesError } = await supabase
-                .from('recetas_apu')
-                .select('*', { count: 'exact', head: true })
-                .eq('producto_id', id);
-
-            if (recipesError) throw recipesError;
-            if (recipesCount && recipesCount > 0) {
-                return { success: false, error: 'No se puede eliminar el producto porque es parte de una o más recetas de servicio (APU).' };
-            }
+            // Removed legacy check on recetas_apu during delete
 
             // Delete
             const { error } = await supabase
@@ -111,9 +102,9 @@ export const useInventory = () => {
             if (error) throw error;
             await fetchInventory();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error deleting product:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 

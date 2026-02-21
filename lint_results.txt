@@ -1,0 +1,116 @@
+
+> bicycle-workshop-pro@0.0.0 lint
+> eslint .
+
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\clients\BikeModal.tsx
+   79:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\finances\CashCountModal.tsx
+  30:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\finances\CashCountModal.tsx:30:9
+  28 |             (counts.b1000 * 1000) +
+  29 |             counts.coins;
+> 30 |         setTotalCounted(total);
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  31 |     }, [counts]);
+  32 |
+  33 |     if (!isOpen) return null;  react-hooks/set-state-in-effect
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\inventory\ProductModal.tsx
+  103:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\services\ServiceModal.tsx
+  105:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:78  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\team\CommissionHistoryModal.tsx
+  20:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  78:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\components\work-orders\CreateOrderModal.tsx
+  74:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\context\AuthContext.tsx
+   82:8   warning  React Hook useEffect has missing dependencies: 'fetchPerfil' and 'loading'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  111:23  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  143:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useAPUTemplates.ts
+  39:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useClients.ts
+   29:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   45:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useCommissions.ts
+   5:52  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  29:23  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  45:23  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  52:8   warning  React Hook useEffect has a missing dependency: 'fetchCommissions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useFinances.ts
+   12:15  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+   74:47  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+   86:40  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  104:23  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  113:8   warning  React Hook useEffect has a missing dependency: 'fetchFinances'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useInventory.ts
+   20:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   75:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useMechanics.ts
+  21:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  70:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useServices.ts
+   47:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  171:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useWorkOrderDetail.ts
+  33:36  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  42:40  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  44:23  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  54:8   warning  React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\hooks\useWorkOrders.ts
+  29:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\pages\Dashboard.tsx
+  237:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\pages\LoginPage.tsx
+  34:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\pages\RegisterPage.tsx
+  55:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\pc\.gemini\antigravity\playground\deep-station\bicycle-workshop-pro\src\pages\WorkOrderDetail.tsx
+  159:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 54 problems (50 errors, 4 warnings)
+

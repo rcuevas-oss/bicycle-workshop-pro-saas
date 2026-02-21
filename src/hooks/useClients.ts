@@ -26,8 +26,8 @@ export const useClients = () => {
 
             if (error) throw error;
             setClients(data as ClientWithBikes[] || []);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -42,9 +42,9 @@ export const useClients = () => {
             if (error) throw error;
             await fetchClients();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error creating client:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -58,9 +58,9 @@ export const useClients = () => {
             if (error) throw error;
             await fetchClients();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error updating client:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -97,9 +97,9 @@ export const useClients = () => {
             if (error) throw error;
             await fetchClients();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error deleting client:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -113,9 +113,9 @@ export const useClients = () => {
             if (error) throw error;
             await fetchClients();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error updating bike:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 
@@ -140,9 +140,9 @@ export const useClients = () => {
             if (error) throw error;
             await fetchClients();
             return { success: true };
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error deleting bike:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     };
 

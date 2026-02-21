@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { X, Search, Wrench, Package, Plus, Calculator } from 'lucide-react';
+import { X, Search, Wrench, Plus, Calculator } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useServices, type ServiceWithRecipe } from '../../hooks/useServices';
-import { useInventory } from '../../hooks/useInventory';
-import { useAuth } from '../../context/AuthContext';
+import { useServices } from '../../hooks/useServices';
+import type { ServicioCatalogo } from '../../types/database';
+import { useAuth } from '../../hooks/useAuth';
 
 interface AddServiceModalProps {
     isOpen: boolean;
@@ -16,9 +16,8 @@ interface AddServiceModalProps {
 export const AddServiceModal: React.FC<AddServiceModalProps> = ({ isOpen, onClose, orderId, onItemAdded, defaultMechanicId }) => {
     const { perfil } = useAuth();
     const { services } = useServices();
-    const { products } = useInventory(); // To get product details (prices, names) for the recipe
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedService, setSelectedService] = useState<ServiceWithRecipe | null>(null);
+    const [selectedService, setSelectedService] = useState<ServicioCatalogo | null>(null);
     const [adding, setAdding] = useState(false);
 
     if (!isOpen) return null;
@@ -50,28 +49,6 @@ export const AddServiceModal: React.FC<AddServiceModalProps> = ({ isOpen, onClos
                 comision_monto: selectedService.precio_base * (selectedService.comision_porcentaje || 0),
                 mecanico_id: defaultMechanicId // Assign default mechanic
             });
-
-            // 2. Add Recipe Items (Products)
-            if (selectedService.receta && selectedService.receta.length > 0) {
-                selectedService.receta.forEach(recipeItem => {
-                    const productDetails = products.find(p => p.id === recipeItem.producto_id);
-                    if (productDetails) {
-                        const cant = recipeItem.cantidad_sugerida;
-                        itemsToInsert.push({
-                            business_id: businessId,
-                            orden_id: orderId,
-                            tipo_item: 'producto',
-                            producto_inventario_id: productDetails.id,
-                            descripcion: productDetails.nombre, // Snapshot name
-                            cantidad: cant,
-                            precio_unitario: productDetails.precio_venta,
-                            total_linea: productDetails.precio_venta * cant,
-                            comision_monto: 0, // Products usually don't give commission to mechanic, or distinct rule
-                            mecanico_id: defaultMechanicId // Assign default mechanic for products too? Maybe yes for tracking.
-                        });
-                    }
-                });
-            }
 
             const { error: insertError } = await supabase
                 .from('ot_detalles')
@@ -153,11 +130,6 @@ export const AddServiceModal: React.FC<AddServiceModalProps> = ({ isOpen, onClos
                                         <div className="font-bold text-slate-900">{service.nombre}</div>
                                         <div className="text-xs text-slate-500 font-bold mt-0.5">${service.precio_base.toLocaleString('es-CL')}</div>
                                     </div>
-                                    {service.receta && service.receta.length > 0 && (
-                                        <div className="flex items-center gap-1 text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                                            <Package size={10} /> +{service.receta.length} APU
-                                        </div>
-                                    )}
                                 </button>
                             ))}
                         </div>
@@ -188,39 +160,13 @@ export const AddServiceModal: React.FC<AddServiceModalProps> = ({ isOpen, onClos
                                         <span className="font-black text-slate-900">${selectedService.precio_base.toLocaleString('es-CL')}</span>
                                     </div>
 
-                                    {selectedService.receta && selectedService.receta.length > 0 && (
-                                        <div className="space-y-2">
-                                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                                <Package size={12} /> Insumos Incluidos (APU)
-                                            </h4>
-                                            {selectedService.receta.map((item, idx) => {
-                                                const product = products.find(p => p.id === item.producto_id);
-                                                return (
-                                                    <div key={idx} className="bg-purple-50 p-3 rounded-lg border border-purple-100 flex justify-between items-center">
-                                                        <div className="text-sm">
-                                                            <span className="font-bold text-purple-900 block">{product?.nombre || 'Producto desconocido'}</span>
-                                                            <span className="text-[10px] text-purple-600 font-bold uppercase">Cant: {item.cantidad_sugerida}</span>
-                                                        </div>
-                                                        <span className="font-bold text-purple-900 text-sm">
-                                                            +{product ? (product.precio_venta * item.cantidad_sugerida).toLocaleString('es-CL') : '0'}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    )}
-
-
                                     <div className="bg-slate-900 text-white p-4 rounded-xl shadow-lg mt-4">
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                                                 <Calculator size={14} /> Presupuesto Estimado
                                             </span>
                                             <span className="text-2xl font-black">
-                                                ${(selectedService.precio_base + (selectedService.receta?.reduce((acc, item) => {
-                                                    const product = products.find(p => p.id === item.producto_id);
-                                                    return acc + (product ? product.precio_venta * item.cantidad_sugerida : 0);
-                                                }, 0) || 0)).toLocaleString('es-CL')}
+                                                ${selectedService.precio_base.toLocaleString('es-CL')}
                                             </span>
                                         </div>
                                         <p className="text-[10px] text-slate-500 text-right">
@@ -233,13 +179,14 @@ export const AddServiceModal: React.FC<AddServiceModalProps> = ({ isOpen, onClos
                                     <button
                                         onClick={handleAddService}
                                         disabled={adding}
-                                        className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                        className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-all flex justify-center items-center relative overflow-hidden h-[52px] disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
-                                        {adding ? 'Agregando...' : (
-                                            <>
-                                                <Plus size={18} /> Agregar a la Orden
-                                            </>
-                                        )}
+                                        <span className={`flex items-center gap-2 transition-transform duration-300 absolute ${adding ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                                            Agregando...
+                                        </span>
+                                        <span className={`flex items-center gap-2 transition-transform duration-300 ${adding ? '-translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}`}>
+                                            <Plus size={18} /> Agregar a la Orden
+                                        </span>
                                     </button>
                                     <button
                                         onClick={() => setSelectedService(null)}

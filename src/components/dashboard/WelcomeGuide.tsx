@@ -1,4 +1,4 @@
-import { Package, Hammer, Users, Bike, ArrowRight, CheckCircle2, X } from 'lucide-react';
+import { Package, Wrench, Users, Bike, ArrowRight, CheckCircle2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface WelcomeGuideProps {
@@ -11,15 +11,15 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose }) => {
             title: 'Configura tu Inventario',
             description: 'Agrega repuestos e insumos (cámaras, frenos, aceites) con sus precios de venta.',
             icon: <Package className="text-purple-600" size={24} />,
-            link: '/inventory',
+            link: '/app/inventory',
             label: 'Ir a Inventario',
             color: 'purple'
         },
         {
-            title: 'Crea tu Catálogo de Servicios',
-            description: 'Define tu mano de obra y crea "Recetas APU" asociando productos del inventario.',
-            icon: <Hammer className="text-blue-600" size={24} />,
-            link: '/services',
+            title: 'Catálogo de Servicios',
+            description: 'Define tu mano de obra para agilizar la creación de órdenes.',
+            icon: <Wrench className="text-blue-600" size={24} />,
+            link: '/app/services',
             label: 'Definir Servicios',
             color: 'blue'
         },
@@ -27,7 +27,7 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose }) => {
             title: 'Registra a tu Equipo',
             description: 'Agrega a tus mecánicos para poder asignarles trabajos y calcular sus comisiones.',
             icon: <Users className="text-emerald-600" size={24} />,
-            link: '/commissions',
+            link: '/app/commissions',
             label: 'Ver Equipo',
             color: 'emerald'
         },
@@ -35,7 +35,7 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onClose }) => {
             title: '¡Recibe tu primera Bicicleta!',
             description: 'Crea una Orden de Trabajo, asigna un mecánico y diagnostica agregando servicios.',
             icon: <Bike className="text-orange-600" size={24} />,
-            link: '/work-orders',
+            link: '/app/work-orders',
             label: 'Abrir Taller',
             color: 'orange'
         }

@@ -9,6 +9,8 @@ export type Json =
 export interface Negocio {
     id: string;
     nombre: string;
+    direccion?: string;
+    telefono?: string;
     creado_en: string;
 }
 
@@ -39,7 +41,7 @@ export interface Bicicleta {
     cliente?: Cliente;
 }
 
-export type TipoProducto = 'insumo';
+export type TipoProducto = 'insumo' | 'repuesto';
 
 export interface InventarioItem {
     id: string;
@@ -75,12 +77,6 @@ export interface ServicioCatalogo {
     creado_en: string;
 }
 
-export interface RecetaAPU {
-    business_id: string;
-    servicio_id: string;
-    producto_id: string;
-    cantidad_sugerida: number;
-}
 
 export type EstadoOrden = 'Pendiente' | 'Abierta' | 'En Progreso' | 'Lista' | 'Entregada' | 'Pagada' | 'Cancelada';
 export type EstadoProceso = 'abierta' | 'en_proceso' | 'lista' | 'entregada' | 'pagada' | 'cancelada';
@@ -103,7 +99,9 @@ export interface OrdenTrabajo {
     estado: string; // Legacy
     estado_proceso: EstadoProceso; // V2 State Machine
     fecha_entrega?: string;
+    pagado_en?: string;
     total: number;
+    checklist_recepcion?: Json;
 
     // Joined Data
     bicicleta?: Bicicleta;
@@ -153,25 +151,4 @@ export interface Mecanico {
     especialidad?: string;
     foto_url?: string;
     creado_en?: string;
-}
-
-// Plantillas APU
-export interface PlantillaAPU {
-    id: string;
-    nombre: string;
-    descripcion?: string;
-    precio_base_sugerido: number;
-    categoria: string;
-    es_publica: boolean;
-    negocio_id?: string;
-    creado_en: string;
-    items?: PlantillaAPUItem[];
-}
-
-export interface PlantillaAPUItem {
-    id: string;
-    plantilla_id: string;
-    nombre_insumo_generico: string;
-    cantidad_sugerida: number;
-    unidad_medida: string;
 }

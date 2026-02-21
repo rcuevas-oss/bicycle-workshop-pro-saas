@@ -1,12 +1,14 @@
+import { X, Search, User, Bike, ChevronRight, CheckCircle2, ArrowRight, ClipboardCheck, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { X, Search, User, Bike, ChevronRight, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useClients, type ClientWithBikes } from '../../hooks/useClients';
+import { useMechanics } from '../../hooks/useMechanics';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useMechanics } from '../../hooks/useMechanics';
+import { useAuth } from '../../hooks/useAuth';
 import { BikeModal } from '../clients/BikeModal';
 import { MechanicModal } from '../team/MechanicModal';
+import { ChecklistRecepcion, type ChecklistData } from './ChecklistRecepcion';
+import type { Json } from '../../types/database';
 
 interface CreateOrderModalProps {
     isOpen: boolean;
@@ -18,11 +20,12 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
     const { perfil } = useAuth();
     const { clients, loading: loadingClients, refresh: refreshClients } = useClients();
     const { mechanics, loading: loadingMechanics, refresh: refreshMechanics } = useMechanics();
-    const [step, setStep] = useState<1 | 2 | 3>(1);
+    const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedClient, setSelectedClient] = useState<ClientWithBikes | null>(null);
     const [selectedBikeId, setSelectedBikeId] = useState<string | null>(null);
     const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null);
+    const [checklistData, setChecklistData] = useState<ChecklistData | undefined>(undefined);
     const [creating, setCreating] = useState(false);
     const [isBikeModalOpen, setIsBikeModalOpen] = useState(false);
     const [isMechanicModalOpen, setIsMechanicModalOpen] = useState(false);
@@ -59,7 +62,8 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                     mecanico_id: selectedMechanicId,
                     estado: 'Pendiente', // Legacy
                     estado_proceso: 'abierta',
-                    total: 0
+                    total: 0,
+                    checklist_recepcion: checklistData as unknown as Json // Stored as JSONB
                 })
                 .select()
                 .single();
@@ -68,12 +72,13 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
 
             if (data) {
                 onClose();
-                navigate(`/work-orders/${data.id}`);
+                navigate(`/app/work-orders/${data.id}`);
             }
 
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error creating order:", err);
-            alert(`Error al crear la orden: ${err.message || err}`);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            alert(`Error al crear la orden: ${errorMessage}`);
         } finally {
             setCreating(false);
         }
@@ -88,11 +93,11 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                     <div>
                         <h2 className="text-xl font-black text-slate-900">Nueva Orden de Trabajo</h2>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${step === 1 ? 'bg-blue-100 text-blue-700' : 'text-slate-400'}`}>1. Cliente</span>
-                            <ChevronRight size={12} className="text-slate-300" />
                             <span className={`text-xs font-bold px-2 py-0.5 rounded ${step === 2 ? 'bg-blue-100 text-blue-700' : 'text-slate-400'}`}>2. Bicicleta</span>
                             <ChevronRight size={12} className="text-slate-300" />
                             <span className={`text-xs font-bold px-2 py-0.5 rounded ${step === 3 ? 'bg-blue-100 text-blue-700' : 'text-slate-400'}`}>3. Mecánico</span>
+                            <ChevronRight size={12} className="text-slate-300" />
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${step === 4 ? 'bg-blue-100 text-blue-700' : 'text-slate-400'}`}>4. Checklist</span>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
@@ -145,7 +150,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                         </div>
                     )}
 
-                    {(step === 2 || step === 3) && selectedClient && (
+                    {(step === 2 || step === 3 || step === 4) && selectedClient && (
                         <div className="space-y-6">
                             <div className="flex items-center gap-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
                                 <div className="p-2 bg-blue-100 text-blue-600 rounded-full">
@@ -158,7 +163,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                                 <button onClick={() => setStep(1)} className="ml-auto text-xs font-bold text-blue-600 hover:underline">Cambiar</button>
                             </div>
 
-                            {step === 3 && selectedBikeId && (
+                            {(step === 3 || step === 4) && selectedBikeId && (
                                 <div className="flex items-center gap-3 p-4 bg-lime-50/50 border border-lime-100 rounded-xl">
                                     <div className="p-2 bg-lime-100 text-lime-700 rounded-full">
                                         <Bike size={20} />
@@ -231,6 +236,38 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                                     )}
                                 </div>
                             )}
+
+                            {step === 4 && selectedMechanicId && (
+                                <div className="flex items-center gap-3 p-4 bg-purple-50/50 border border-purple-100 rounded-xl">
+                                    <div className="p-2 bg-purple-100 text-purple-700 rounded-full">
+                                        <User size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">Mecánico Asignado</p>
+                                        <h3 className="font-bold text-slate-900">
+                                            {mechanics.find(m => m.id === selectedMechanicId)?.nombre}
+                                        </h3>
+                                    </div>
+                                    <button onClick={() => setStep(3)} className="ml-auto text-xs font-bold text-blue-600 hover:underline">Cambiar</button>
+                                </div>
+                            )}
+
+                            {step === 4 && (
+                                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <ClipboardCheck size={20} className="text-slate-600" />
+                                            <h3 className="font-bold text-slate-900">Checklist de Recepción</h3>
+                                        </div>
+                                    </div>
+                                    <div className="p-4">
+                                        <ChecklistRecepcion
+                                            value={checklistData}
+                                            onChange={setChecklistData}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -292,9 +329,9 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
 
                 {/* Footer */}
                 <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
-                    {(step === 2 || step === 3) && (
+                    {(step === 2 || step === 3 || step === 4) && (
                         <button
-                            onClick={() => setStep(step === 3 ? 2 : 1)}
+                            onClick={() => setStep(step === 4 ? 3 : step === 3 ? 2 : 1)}
                             className="text-sm font-bold text-slate-500 hover:text-slate-800"
                         >
                             Atrás
@@ -303,12 +340,25 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                     <div className="ml-auto">
                         {step === 3 && selectedMechanicId && (
                             <button
+                                onClick={() => setStep(4)}
+                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                            >
+                                Siguiente
+                                <ArrowRight size={18} />
+                            </button>
+                        )}
+                        {step === 4 && selectedMechanicId && (
+                            <button
                                 onClick={handleCreateOrder}
                                 disabled={creating}
-                                className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden h-12 w-44"
                             >
-                                {creating ? 'Creando...' : 'Crear Orden'}
-                                {!creating && <ArrowRight size={18} />}
+                                <span className={`flex items-center gap-2 transition-transform duration-300 absolute ${creating ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                                    <Loader2 className="animate-spin" size={18} /> Creando...
+                                </span>
+                                <span className={`flex items-center gap-2 transition-transform duration-300 ${creating ? '-translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}`}>
+                                    Crear Orden <ArrowRight size={18} />
+                                </span>
                             </button>
                         )}
                     </div>

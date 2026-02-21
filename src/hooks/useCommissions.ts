@@ -1,12 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
+export interface CommissionData {
+    id: string;
+    estado: 'pendiente' | 'pagada';
+    monto: number;
+    fecha_calculo: string;
+    detalle?: { descripcion: string };
+    orden?: {
+        id: string;
+        cliente?: { nombre: string };
+        estado_proceso: string;
+    };
+}
+
 export const useCommissions = (mechanicId?: string) => {
-    const [commissions, setCommissions] = useState<any[]>([]);
+    const [commissions, setCommissions] = useState<CommissionData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCommissions = async () => {
+    const fetchCommissions = useCallback(async () => {
         setLoading(true);
         try {
             let query = supabase
@@ -26,12 +39,12 @@ export const useCommissions = (mechanicId?: string) => {
 
             if (fetchError) throw fetchError;
             setCommissions(data || []);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
-    };
+    }, [mechanicId]);
 
     const updateStatus = async (commissionId: string, status: 'pendiente' | 'pagada') => {
         try {
@@ -42,14 +55,14 @@ export const useCommissions = (mechanicId?: string) => {
 
             if (updateError) throw updateError;
             await fetchCommissions();
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         }
     };
 
     useEffect(() => {
         fetchCommissions();
-    }, [mechanicId]);
+    }, [fetchCommissions]);
 
     return { commissions, loading, error, refresh: fetchCommissions, updateStatus };
 };

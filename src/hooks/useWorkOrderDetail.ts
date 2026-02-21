@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { OrdenTrabajo, OrdenDetalle } from '../types/database';
 
@@ -8,9 +8,11 @@ export const useWorkOrderDetail = (id: string | undefined) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchDetail = async () => {
+    const fetchDetail = useCallback(async () => {
         if (!id) return;
         try {
+            // Do NOT nullify existing data on refresh to prevent UI crashes 
+            // if components expect strict shapes and the loading state isn't perfectly handled.
             setLoading(true);
 
             // Fetch order with mechanic
@@ -23,14 +25,14 @@ export const useWorkOrderDetail = (id: string | undefined) => {
                 .select(`
           *,
           cliente:clientes(*),
-          bicicleta:bicicletas(*),
+          bicicleta:bicicletas(*, cliente:clientes(*)),
           mecanico:mecanicos(*)
         `)
                 .eq('id', id)
                 .maybeSingle();
 
             if (orderError) throw orderError;
-            setOrder((orderData as any) || null);
+            setOrder((orderData as unknown as OrdenTrabajo) || null);
 
             // Fetch details (Services and Products)
             const { data: detailsData, error: detailsError } = await supabase
@@ -39,19 +41,19 @@ export const useWorkOrderDetail = (id: string | undefined) => {
                 .eq('orden_id', id);
 
             if (detailsError) throw detailsError;
-            setDetails((detailsData as any) || []);
+            setDetails((detailsData as unknown as OrdenDetalle[]) || []);
 
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error fetching order:', err);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
     useEffect(() => {
         fetchDetail();
-    }, [id]);
+    }, [fetchDetail]);
 
     return { order, details, loading, error, refresh: fetchDetail };
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Save, Loader2, Phone, Mail, MapPin } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useClients } from '../../hooks/useClients';
 import type { Cliente } from '../../types/database';
 
@@ -165,10 +165,14 @@ export const ClientModal: React.FC<ClientModalProps> = ({ isOpen, onClose, initi
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center relative overflow-hidden h-12 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                            {loading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar Cliente')}
+                            <span className={`flex items-center gap-2 transition-transform duration-300 absolute ${loading ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                                <Loader2 className="animate-spin" size={20} /> Guardando...
+                            </span>
+                            <span className={`flex items-center gap-2 transition-transform duration-300 ${loading ? '-translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}`}>
+                                <Save size={20} /> {initialData ? 'Actualizar' : 'Guardar Cliente'}
+                            </span>
                         </button>
                     </div>
                 </form>

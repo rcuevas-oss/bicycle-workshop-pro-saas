@@ -5,24 +5,36 @@ import { Timeline } from '../components/ui/Timeline';
 import { Wrench, DollarSign, Bike, AlertTriangle, Filter, Plus, ChevronRight, TrendingUp, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWorkOrders } from '../hooks/useWorkOrders';
+import { useInventory } from '../hooks/useInventory';
 import { WelcomeGuide } from '../components/dashboard/WelcomeGuide';
-// import { useAuth } from '../context/AuthContext'; // Assuming this path for useAuth
 
 import { CreateOrderModal } from '../components/work-orders/CreateOrderModal';
 
 export const Dashboard: React.FC = () => {
-    // const { perfil } = useAuth(); // Unused for now
-    const { orders, error, loading } = useWorkOrders();
-    // const [filterPeriod, setFilterPeriod] = useState<'today' | 'week' | 'month'>('today'); // Unused for now
+    const { orders, error } = useWorkOrders();
+    const { products } = useInventory();
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
     const [showGuide, setShowGuide] = useState(false);
 
+    // Calculate Today's Income
+    const today = new Date().toISOString().split('T')[0];
+    const todayIncome = orders
+        .filter(o => o.creado_en.startsWith(today))
+        .reduce((acc, o) => acc + (o.total || 0), 0);
+
+    // Low stock count
+    const lowStockCount = products.filter(p => p.stock_actual <= (p.stock_minimo || 0)).length;
+
+    // Active orders (in process)
+    const activeOrders = orders.filter(o => !['pagada', 'entregada', 'cancelada'].includes(o.estado_proceso || ''));
+    const readyToDeliver = orders.filter(o => o.estado_proceso === 'lista').length;
+
     const stats = [
         {
-            label: 'Órdenes Abiertas',
-            value: orders.filter(o => o.estado !== 'Entregado' && o.estado !== 'Completado').length.toString(),
+            label: 'Órdenes Activas',
+            value: activeOrders.length.toString(),
             icon: <Wrench size={24} />,
-            trend: '+2 hoy',
+            trend: 'Taller ocupado',
             color: 'blue',
             bg: 'bg-blue-50',
             text: 'text-blue-600',
@@ -30,19 +42,19 @@ export const Dashboard: React.FC = () => {
         },
         {
             label: 'Ingresos Hoy',
-            value: `$${orders.reduce((acc, o) => acc + o.total, 0).toLocaleString('es-CL')}`,
+            value: `$${todayIncome.toLocaleString('es-CL')}`,
             icon: <DollarSign size={24} />,
-            trend: '+15% vs ayer',
+            trend: 'Ventas del día',
             color: 'green',
             bg: 'bg-emerald-50',
             text: 'text-emerald-600',
             border: 'border-emerald-100'
         },
         {
-            label: 'Bicicletas en Taller',
-            value: orders.filter(o => o.estado !== 'Entregado').length.toString(),
+            label: 'Bicis en Taller',
+            value: activeOrders.length.toString(),
             icon: <Bike size={24} />,
-            trend: '3 listas',
+            trend: `${readyToDeliver} listas`,
             color: 'purple',
             bg: 'bg-indigo-50',
             text: 'text-indigo-600',
@@ -50,9 +62,9 @@ export const Dashboard: React.FC = () => {
         },
         {
             label: 'Stock Bajo',
-            value: '4', // Mock content for now
+            value: lowStockCount.toString(),
             icon: <AlertTriangle size={24} />,
-            trend: 'Crítico',
+            trend: lowStockCount > 0 ? 'Reponer pronto' : 'Stock OK',
             color: 'orange',
             bg: 'bg-amber-50',
             text: 'text-amber-600',
@@ -60,12 +72,14 @@ export const Dashboard: React.FC = () => {
         },
     ];
 
-    const recentEvents = [
-        { id: '1', title: 'Servicio Completado', description: 'Juan P. finalizó Mantenimiento General (Trek Marlin 5)', time: 'Hace 15 min', type: 'success' },
-        { id: '2', title: 'Nueva Orden', description: 'Recibida: Specialized Rockhopper (Frenos)', time: 'Hace 45 min', type: 'start' },
-        { id: '3', title: 'Stock Crítico', description: 'Cámaras 29" por debajo del mínimo', time: 'Hace 1h', type: 'warning' },
-        { id: '4', title: 'Comentario Agregado', description: 'Cliente aprobó cambio de cadena', time: 'Hace 2h', type: 'info' },
-    ];
+    // Real dynamic activity from newest orders
+    const recentActivity = orders.slice(0, 4).map(order => ({
+        id: order.id,
+        title: order.estado_proceso === 'lista' ? 'Reparación Finalizada' : 'Nueva Orden OT',
+        description: `${order.cliente?.nombre || order.bicicleta?.cliente?.nombre || order.cliente_nombre || 'Cliente'} - ${order.bicicleta?.modelo || order.bici_modelo || 'Bicicleta'}`,
+        time: new Date(order.creado_en).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+        type: (order.estado_proceso === 'lista' ? 'success' : 'start') as 'success' | 'start' | 'info' | 'warning'
+    }));
 
     // We no longer block the entire dashboard with a full-screen loader.
     // Instead, stats and tables will show empty or simplified states while fetching.
@@ -151,7 +165,7 @@ export const Dashboard: React.FC = () => {
                         className="h-full border-0 shadow-xl shadow-slate-200/50"
                         title="Órdenes de Trabajo Activas"
                         action={
-                            <Link to="/work-orders" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
+                            <Link to="/app/work-orders" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
                                 Ver todas <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                             </Link>
                         }
@@ -166,7 +180,7 @@ export const Dashboard: React.FC = () => {
                                     Aún no tienes órdenes de trabajo. Comienza registrando tu primera reparación para ver la magia en acción.
                                 </p>
                                 <Link
-                                    to="/work-orders"
+                                    to="/app/work-orders"
                                     className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-95 flex items-center gap-2"
                                 >
                                     <Plus size={20} /> Crear Primera Orden
@@ -203,7 +217,7 @@ export const Dashboard: React.FC = () => {
                                                     </td>
                                                     <td className="px-4 py-5 whitespace-nowrap font-bold text-sm text-slate-500">{order.fecha_entrega || 'N/A'}</td>
                                                     <td className="px-4 py-5 whitespace-nowrap text-right">
-                                                        <Link to={`/work-orders/${order.id}`} className="p-2 inline-block text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                                                        <Link to={`/app/work-orders/${order.id}`} className="p-2 inline-block text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                                                             <ChevronRight size={18} />
                                                         </Link>
                                                     </td>
@@ -220,7 +234,7 @@ export const Dashboard: React.FC = () => {
                 {/* Timeline Widget */}
                 <div className="lg:col-span-4">
                     <Card title="Actividad Reciente" className="h-full border-0 shadow-xl shadow-slate-200/50">
-                        <Timeline items={recentEvents as any} />
+                        <Timeline items={recentActivity} />
                         <button className="w-full mt-6 py-3 border border-slate-100 rounded-2xl text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-50 hover:text-slate-600 transition-all">
                             Ver registros completos
                         </button>

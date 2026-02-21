@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Package, DollarSign, BarChart3, Save, Loader2, Calculator } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { X, Package, DollarSign, BarChart3, Save, Loader2, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 import type { TipoProducto, InventarioItem } from '../../types/database';
 import { useInventory } from '../../hooks/useInventory';
 
@@ -17,54 +17,35 @@ export const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, ini
 
     const [nombre, setNombre] = useState('');
     const [sku, setSku] = useState('');
-    const [tipo, setTipo] = useState<TipoProducto>('insumo');
-    const [costo, setCosto] = useState('');
+    const [costo, setCosto] = useState(''); // Costo Unitario
     const [precioVenta, setPrecioVenta] = useState('');
     const [stockActual, setStockActual] = useState('');
     const [stockMinimo, setStockMinimo] = useState('');
-    const [unidadMedida, setUnidadMedida] = useState('unidades');
-
-    // UI Helper states for "Calculator"
-    const [showCalculator, setShowCalculator] = useState(false);
-    const [calcCostoTotal, setCalcCostoTotal] = useState('');
-    const [calcCantidad, setCalcCantidad] = useState('');
 
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
                 setNombre(initialData.nombre);
                 setSku(initialData.sku || '');
-                setTipo(initialData.tipo);
                 setCosto(initialData.costo.toString());
                 setPrecioVenta(initialData.precio_venta.toString());
                 setStockActual(initialData.stock_actual.toString());
                 setStockMinimo(initialData.stock_minimo.toString());
-                setUnidadMedida(initialData.unidad_medida || 'unidades');
+                if (initialData.costo) {
+                    setCosto(initialData.costo.toString());
+                }
             } else {
                 setNombre('');
                 setSku('');
-                setTipo('insumo');
                 setCosto('');
                 setPrecioVenta('');
                 setStockActual('');
                 setStockMinimo('');
-                setUnidadMedida('unidades');
             }
         }
     }, [isOpen, initialData]);
 
     if (!isOpen) return null;
-
-    const applyCalculation = () => {
-        const total = parseFloat(calcCostoTotal);
-        const qty = parseFloat(calcCantidad);
-        if (total && qty) {
-            const unitPrice = total / qty;
-            setPrecioVenta(unitPrice.toFixed(2));
-            setCosto(total.toString());
-            setShowCalculator(false);
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,37 +57,29 @@ export const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, ini
                 throw new Error('No se encontró información del negocio.');
             }
 
-            let result;
-
             const productData = {
                 nombre,
                 sku: sku || undefined,
-                tipo,
+                tipo: 'repuesto' as TipoProducto,
                 costo: Number(costo) || 0,
                 precio_venta: Number(precioVenta) || 0,
                 stock_actual: Number(stockActual) || 0,
                 stock_minimo: Number(stockMinimo) || 0,
-                unidad_medida: unidadMedida
+                unidad_medida: 'uni'
             };
 
-            if (initialData) {
-                // Update
-                result = await updateProduct(initialData.id, productData);
-            } else {
-                // Create
-                result = await createProduct({
-                    ...productData,
-                    business_id: businessId
-                });
-            }
+            const result = initialData
+                ? await updateProduct(initialData.id, productData)
+                : await createProduct({ ...productData, business_id: businessId });
 
             if (!result.success) throw new Error(result.error);
 
             refresh();
             onClose();
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error saving product:', error);
-            alert('Error al guardar producto: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            alert('Error al guardar producto: ' + errorMessage);
         } finally {
             setLoading(false);
         }
@@ -125,166 +98,100 @@ export const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, ini
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
+                <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto">
+                    {/* 1. Nombre del Producto */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Nombre del Producto <span className="text-red-500">*</span></label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nombre del Producto</label>
                         <div className="relative">
                             <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                                 type="text"
                                 required
                                 className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900"
-                                placeholder="Ej: Cámara 29 Valvula Presta"
+                                placeholder="Ej: Aceite Mineral Shimano"
                                 value={nombre}
                                 onChange={e => setNombre(e.target.value)}
                             />
                         </div>
                     </div>
 
+                    {/* 2. SKU */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">SKU / Código</label>
+                        <input
+                            type="text"
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono font-medium text-slate-900"
+                            placeholder="Opcional"
+                            value={sku}
+                            onChange={e => setSku(e.target.value)}
+                        />
+                    </div>
+
+                    {/* 3. Costos y Stock */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Unidad de Medida</label>
-                            <select
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 appearance-none"
-                                value={unidadMedida}
-                                onChange={e => setUnidadMedida(e.target.value)}
-                            >
-                                <option value="unidades">Unidades (UN)</option>
-                                <option value="gramos">Gramos (g)</option>
-                                <option value="mililitros">Mililitros (ml)</option>
-                                <option value="metros">Metros (m)</option>
-                            </select>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">SKU / Código</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Stock Inicial</label>
                             <div className="relative">
-                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400" size={18} />
                                 <input
-                                    type="text"
-                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono font-medium text-slate-900"
-                                    placeholder="CAM-29-PV"
-                                    value={sku}
-                                    onChange={e => setSku(e.target.value)}
+                                    type="number"
+                                    min="0"
+                                    required
+                                    className="w-full pl-12 pr-4 py-3 bg-blue-50 border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-black text-blue-900"
+                                    placeholder="Ej: 50"
+                                    value={stockActual}
+                                    onChange={e => setStockActual(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Costo Unitario ($)</label>
+                            <div className="relative">
+                                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" size={18} />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    required
+                                    className="w-full pl-12 pr-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-black text-emerald-900"
+                                    placeholder="Ej: 2500"
+                                    value={costo}
+                                    onChange={e => setCosto(e.target.value)}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {!showCalculator ? (
-                        <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-300">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Costo Adquisición ($)</label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="any"
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900"
-                                        placeholder="0"
-                                        value={costo}
-                                        onChange={e => setCosto(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Valor {unidadMedida === 'unidades' ? 'Unitario' : 'por ' + unidadMedida.slice(0, -1)} (APU)</label>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCalculator(true)}
-                                        className="text-[10px] font-black text-blue-600 uppercase hover:underline"
-                                    >
-                                        Calcular
-                                    </button>
-                                </div>
-                                <div className="relative">
-                                    <Calculator className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="any"
-                                        className="w-full pl-12 pr-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-900 placeholder:text-emerald-300"
-                                        placeholder="0"
-                                        value={precioVenta}
-                                        onChange={e => setPrecioVenta(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-blue-600 p-4 rounded-xl space-y-3 animate-in slide-in-from-top-2 duration-300">
-                            <h4 className="text-white font-black text-xs uppercase tracking-widest">Asistente de Costos ({unidadMedida})</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                <input
-                                    type="number"
-                                    placeholder="Costo Total ($)"
-                                    className="px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:bg-white focus:text-blue-900 transition-all font-bold"
-                                    value={calcCostoTotal}
-                                    onChange={e => setCalcCostoTotal(e.target.value)}
-                                />
-                                <input
-                                    type="number"
-                                    placeholder={`Cant. en ${unidadMedida}`}
-                                    className="px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:bg-white focus:text-blue-900 transition-all font-bold"
-                                    value={calcCantidad}
-                                    onChange={e => setCalcCantidad(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowCalculator(false)}
-                                    className="flex-1 py-2 text-white/70 text-xs font-black uppercase"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={applyCalculation}
-                                    className="flex-2 px-4 py-2 bg-white text-blue-600 rounded-lg text-xs font-black uppercase shadow-xl"
-                                >
-                                    Calcular y Aplicar
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="bg-blue-50 p-3 rounded-lg flex items-start gap-2">
-                        <DollarSign className="text-blue-600 mt-0.5" size={16} />
-                        <p className="text-xs text-blue-800 leading-tight">
-                            <strong>Nota:</strong> El Valor APU es el costo interno. Si compras 1L (1000ml) a $10.000, el Valor APU es **$10**.
-                        </p>
-                    </div>
-
+                    {/* 5. Venta y Alerta */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Stock Actual ({unidadMedida})</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Precio al Público ($)</label>
                             <input
                                 type="number"
                                 min="0"
                                 step="any"
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900"
-                                placeholder="0"
-                                value={stockActual}
-                                onChange={e => setStockActual(e.target.value)}
+                                placeholder="Precio venta"
+                                value={precioVenta}
+                                onChange={e => setPrecioVenta(e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Stock Mínimo</label>
-                            <input
-                                type="number"
-                                min="0"
-                                step="any"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900"
-                                placeholder="0"
-                                value={stockMinimo}
-                                onChange={e => setStockMinimo(e.target.value)}
-                            />
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Stock Mínimo</label>
+                            <div className="relative">
+                                <AlertTriangle className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400" size={16} />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900"
+                                    placeholder="Avisar con..."
+                                    value={stockMinimo}
+                                    onChange={e => setStockMinimo(e.target.value)}
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="pt-4 flex gap-3">
+                    <div className="pt-2 flex gap-3">
                         <button
                             type="button"
                             onClick={onClose}
@@ -294,11 +201,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, ini
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            disabled={loading || !nombre || !stockActual}
+                            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center relative overflow-hidden h-12 disabled:opacity-50"
                         >
-                            {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                            {loading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar Producto')}
+                            <span className={`flex items-center gap-2 transition-transform duration-300 absolute ${loading ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                                <Loader2 className="animate-spin" size={20} />
+                            </span>
+                            <span className={`flex items-center gap-2 transition-transform duration-300 ${loading ? '-translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}`}>
+                                <Save size={20} /> {initialData ? 'Actualizar' : 'Guardar'}
+                            </span>
                         </button>
                     </div>
                 </form>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, DollarSign, Calculator, CheckCircle2 } from 'lucide-react';
 
 interface CashCountModalProps {
@@ -17,18 +17,13 @@ export const CashCountModal: React.FC<CashCountModalProps> = ({ isOpen, onClose,
         coins: 0
     });
 
-    const [totalCounted, setTotalCounted] = useState(0);
-
-    useEffect(() => {
-        const total =
-            (counts.b20000 * 20000) +
-            (counts.b10000 * 10000) +
-            (counts.b5000 * 5000) +
-            (counts.b2000 * 2000) +
-            (counts.b1000 * 1000) +
-            counts.coins;
-        setTotalCounted(total);
-    }, [counts]);
+    const totalCounted =
+        (counts.b20000 * 20000) +
+        (counts.b10000 * 10000) +
+        (counts.b5000 * 5000) +
+        (counts.b2000 * 2000) +
+        (counts.b1000 * 1000) +
+        counts.coins;
 
     if (!isOpen) return null;
 

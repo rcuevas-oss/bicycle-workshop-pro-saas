@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Bike, Tag, Palette, Hash, Calendar, Save, Loader2, List } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useClients } from '../../hooks/useClients';
-import type { Bicicleta } from '../../types/database';
+import type { Bicicleta, TipoBicicleta } from '../../types/database';
 
 interface BikeModalProps {
     isOpen: boolean;
@@ -76,7 +76,7 @@ export const BikeModal: React.FC<BikeModalProps> = ({
                 cliente_id: clientId,
                 marca: formData.marca,
                 modelo: formData.modelo,
-                tipo: formData.tipo as any,
+                tipo: formData.tipo as TipoBicicleta,
                 color: formData.color || undefined,
                 serial: formData.serial || undefined,
                 anio: formData.anio || undefined
@@ -100,9 +100,10 @@ export const BikeModal: React.FC<BikeModalProps> = ({
             refresh();
             onClose();
             alert(initialData ? 'Bicicleta actualizada' : 'Bicicleta registrada');
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error saving bike:', error);
-            alert('Error al guardar bicicleta: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            alert('Error al guardar bicicleta: ' + errorMessage);
         } finally {
             setLoading(false);
         }
@@ -221,15 +222,18 @@ export const BikeModal: React.FC<BikeModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                        >
-                            {loading ? <Loader2 className="animate-spin" size={20} /> : <><Save size={20} /> {initialData ? 'Guardar Cambios' : 'Registrar Bicicleta'}</>}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center relative overflow-hidden h-14"
+                    >
+                        <span className={`flex items-center gap-2 transition-transform duration-300 absolute ${loading ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                            <Loader2 className="animate-spin" size={20} /> Guardando...
+                        </span>
+                        <span className={`flex items-center gap-2 transition-transform duration-300 ${loading ? '-translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}`}>
+                            <Save size={20} /> {initialData ? 'Guardar Cambios' : 'Registrar Bicicleta'}
+                        </span>
+                    </button>
                 </form>
             </div>
         </div>

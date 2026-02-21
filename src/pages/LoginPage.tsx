@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
-import { Loader2, Lock, Mail, Bike } from 'lucide-react'; // Bike kept for logo if needed, or remove if not. Let's keep it for now as it was used in layout.
+import { useAuth } from '../hooks/useAuth';
+import { Loader2, Lock, Mail, Bike } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -9,6 +10,13 @@ export const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { user, perfil } = useAuth();
+
+    useEffect(() => {
+        if (user && perfil) {
+            navigate('/app');
+        }
+    }, [user, perfil, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,9 +30,9 @@ export const LoginPage: React.FC = () => {
             });
 
             if (error) throw error;
-            navigate('/');
-        } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión');
+            navigate('/app');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
         } finally {
             setLoading(false);
         }

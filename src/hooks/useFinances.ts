@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { startOfDay, startOfWeek, subDays, startOfMonth, endOfDay } from 'date-fns';
 
@@ -9,7 +9,7 @@ export interface FinancialEntry {
     monto: number;
     tipo: 'ingreso' | 'egreso';
     categoria: string;
-    detalle?: any; // Para drill-down
+    detalle?: unknown; // Para drill-down
 }
 
 export type ReferencePeriod = 'hoy' | 'semana' | 'quincena' | 'mes';
@@ -21,7 +21,7 @@ export const useFinances = () => {
     const [period, setPeriod] = useState<ReferencePeriod>('mes');
     const [currentDate, setCurrentDate] = useState(new Date());
 
-    const fetchFinances = async () => {
+    const fetchFinances = useCallback(async () => {
         setLoading(true);
         try {
             // Determinar rango de fechas
@@ -49,12 +49,13 @@ export const useFinances = () => {
                 .select(`
                     id, 
                     creado_en, 
+                    pagado_en,
                     total,
                     detalles:ot_detalles(descripcion, total_linea)
                 `)
                 .eq('estado_proceso', 'pagada')
-                .gte('creado_en', startDate.toISOString())
-                .lte('creado_en', endDate.toISOString());
+                .gte('pagado_en', startDate.toISOString())
+                .lte('pagado_en', endDate.toISOString());
 
             if (ordersError) throw ordersError;
 
@@ -71,9 +72,9 @@ export const useFinances = () => {
 
             // Add incomes from order items
             orders.forEach(order => {
-                order.detalles?.forEach((det: any) => {
+                order.detalles?.forEach((det: { descripcion: string; total_linea: number }) => {
                     allEntries.push({
-                        fecha: order.creado_en,
+                        fecha: order.pagado_en || order.creado_en,
                         descripcion: det.descripcion,
                         monto: det.total_linea,
                         tipo: 'ingreso',
@@ -83,7 +84,7 @@ export const useFinances = () => {
             });
 
             // Add expenses from commissions
-            commissions.forEach((comm: any) => {
+            commissions.forEach((comm: { detalle?: { descripcion: string } | { descripcion: string }[]; monto: number; fecha_calculo: string }) => {
                 const desc = Array.isArray(comm.detalle)
                     ? comm.detalle[0]?.descripcion
                     : comm.detalle?.descripcion;
@@ -101,16 +102,16 @@ export const useFinances = () => {
             allEntries.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
             setEntries(allEntries);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al obtener finanzas');
         } finally {
             setLoading(false);
         }
-    };
+    }, [period, currentDate]);
 
     useEffect(() => {
         fetchFinances();
-    }, [period, currentDate]);
+    }, [fetchFinances]);
 
     return { entries, loading, error, period, setPeriod, currentDate, setCurrentDate, refresh: fetchFinances };
 };

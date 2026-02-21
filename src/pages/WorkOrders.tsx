@@ -20,6 +20,7 @@ export const WorkOrders: React.FC = () => {
     const filteredOrders = orders.filter(order => {
         const matchesSearch =
             order.cliente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.bicicleta?.cliente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.id.slice(0, 8).includes(searchTerm.toLowerCase()) ||
             order.bicicleta?.modelo?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -105,7 +106,7 @@ export const WorkOrders: React.FC = () => {
                         filteredOrders.map(order => (
                             <div
                                 key={order.id}
-                                onClick={() => navigate(`/work-orders/${order.id}`)}
+                                onClick={() => navigate(`/app/work-orders/${order.id}`)}
                                 className="group bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col md:flex-row gap-6 relative overflow-hidden"
                             >
                                 {/* Status Strip */}
@@ -127,7 +128,7 @@ export const WorkOrders: React.FC = () => {
                                         <div className="flex items-center gap-2 mb-1">
                                             <User size={14} className="text-slate-400" />
                                             <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">
-                                                {order.cliente?.nombre || order.cliente_nombre || 'Cliente Desconocido'}
+                                                {order.cliente?.nombre || order.bicicleta?.cliente?.nombre || order.cliente_nombre || 'Cliente Desconocido'}
                                             </h3>
                                         </div>
                                         <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">

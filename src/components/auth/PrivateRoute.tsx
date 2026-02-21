@@ -1,9 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
 export const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { user, loading } = useAuth();
+    const { user, perfil, loading } = useAuth();
     const location = useLocation();
 
     if (loading) {
@@ -15,7 +15,7 @@ export const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children
         );
     }
 
-    if (!user) {
+    if (!user || !perfil) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
