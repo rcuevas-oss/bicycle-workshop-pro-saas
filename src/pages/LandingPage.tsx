@@ -11,8 +11,10 @@ import {
     CheckCircle2,
     ArrowRight,
     HelpCircle,
-    Home
+    Home,
+    Github
 } from 'lucide-react';
+import { SiReact, SiTypescript, SiTailwindcss, SiSupabase, SiVite } from 'react-icons/si';
 
 // Mockup Component to simulate the real Dashboard
 const DashboardMockup: React.FC = () => {
@@ -134,6 +136,9 @@ export const LandingPage: React.FC = () => {
                         <a href="#caracteristicas" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Características</a>
                         <a href="#equipo" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Equipo</a>
                         <a href="#faq" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Preguntas</a>
+                        <a href="https://github.com/rcuevas-oss" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors flex items-center justify-center p-1" title="Visitar mi GitHub">
+                            <Github size={20} />
+                        </a>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -176,7 +181,7 @@ export const LandingPage: React.FC = () => {
                     </h1>
 
                     <p className="max-w-2xl mx-auto text-slate-500 text-lg md:text-xl font-medium leading-relaxed mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-                        Toma el control total de tu operación: desde la bodega de repuestos hasta el cálculo de comisiones para tus mecánicos. Diseñado por y para especialistas.
+                        Toma el control total de tu operación: inspecciones con <strong><span translate="no">Checklist</span> Digital interactivo</strong>, control estricto de repuestos y cálculo automático de comisiones para mecánicos.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up mb-16 md:mb-20" style={{ animationDelay: '0.3s' }}>
@@ -225,6 +230,22 @@ export const LandingPage: React.FC = () => {
                 </div>
             </section>
 
+            {/* Tech Stack Banner */}
+            <section className="py-12 border-y border-slate-100 bg-white">
+                <div className="max-w-7xl mx-auto px-4">
+                    <p className="text-center text-xs font-black text-slate-400 uppercase tracking-widest mb-8">
+                        Construido con tecnología moderna e infraestructura de clase mundial
+                    </p>
+                    <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 *:opacity-50 hover:*:opacity-100 hover:*:grayscale-0 *:grayscale *:transition-all *:duration-500">
+                        <div className="flex items-center gap-2 text-slate-600 hover:text-[#61DAFB]"><SiReact size={32} /> <span className="font-bold hidden sm:block text-slate-400">React 19</span></div>
+                        <div className="flex items-center gap-2 text-slate-600 hover:text-[#3178C6]"><SiTypescript size={32} /> <span className="font-bold hidden sm:block text-slate-400">TypeScript</span></div>
+                        <div className="flex items-center gap-2 text-slate-600 hover:text-[#06B6D4]"><SiTailwindcss size={32} /> <span className="font-bold hidden sm:block text-slate-400">Tailwind</span></div>
+                        <div className="flex items-center gap-2 text-slate-600 hover:text-[#3ECF8E]"><SiSupabase size={32} /> <span className="font-bold hidden sm:block text-slate-400">Supabase</span></div>
+                        <div className="flex items-center gap-2 text-slate-600 hover:text-[#646CFF]"><SiVite size={32} /> <span className="font-bold hidden sm:block text-slate-400">Vite</span></div>
+                    </div>
+                </div>
+            </section>
+
             {/* Features Title */}
             <section id="caracteristicas" className="py-20 px-4 bg-white">
                 <div className="max-w-7xl mx-auto">
@@ -258,9 +279,9 @@ export const LandingPage: React.FC = () => {
                             <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-slate-100 group-hover:bg-slate-900 transition-colors">
                                 <FileText className="text-slate-900 group-hover:text-emerald-400 transition-colors" size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-3">Checklist de Recepción</h3>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3"><span translate="no">Checklist</span> Digital Inteligente</h3>
                             <p className="text-slate-500 font-medium leading-relaxed">
-                                Documenta el estado exacto en que ingresa la bicicleta con un checklist digital interactivo, protegiendo tu taller ante cualquier reclamo de los clientes.
+                                Evalúa transmisión, frenos y estado general con un solo toque. Protege tu taller de malentendidos dejando evidencia de accesorios y daños al recibir la bicicleta.
                             </p>
                             <ul className="mt-6 space-y-2">
                                 <li className="flex items-center gap-2 text-xs font-bold text-slate-400">
